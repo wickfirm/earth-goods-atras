@@ -1,0 +1,19 @@
+import React from 'react'
+import {FormLabel} from 'react-bootstrap';
+import clsx from 'clsx';
+
+type Props = {
+    text: string,
+    isRequired?: boolean
+}
+
+const WickFormLabel: React.FC<Props> = ({text, isRequired = false}) => {
+    return (
+        <div>
+            <FormLabel
+                className={clsx("fs-base fw-semibold form-label mt-3", {'required': isRequired})}>{text}</FormLabel>
+        </div>
+    );
+}
+
+export default WickFormLabel;

@@ -1,0 +1,94 @@
+import React, {useEffect, useState} from 'react'
+import {useNavigate, useParams} from 'react-router-dom'
+import {KTCard, KTCardBody, KTSVG} from '../../../../../_metronic/helpers';
+import {KTCardHeader} from '../../../../../_metronic/helpers/components/KTCardHeader';
+import {EditCardAction} from '../../../../components/misc/CardAction';
+import {generatePageTitle} from "../../../../helpers/pageTitleGenerator";
+import {getErrorPage, submitRequest} from '../../../../helpers/requests';
+import {Sections} from "../../../../helpers/sections";
+import {PageTypes} from '../../../../helpers/variables';
+
+import {User} from '../../../../models/iam/User';
+import {getProfile, getUser} from '../../../../requests/iam/User';
+import {useWickApp} from "../../../../modules/general/WickApp.loader.ts";
+
+const Profile: React.FC = () => {
+    const [user, setUser] = useState<User | null>(null);
+
+    const wickApp = useWickApp();
+
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        submitRequest(getProfile, [], (response) => {
+            const errorPage = getErrorPage(response);
+
+            if (errorPage) {
+                navigate(errorPage);
+            } else {
+                setUser(response);
+            }
+        });
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    useEffect(() => {
+        if (user) {
+            wickApp.setPageTitle(generatePageTitle(Sections.IAM_USERS, PageTypes.SHOW, user.name))
+        }
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user]);
+
+    return (
+        <KTCard className='mb-5 mb-xl-10'>
+            <KTCardHeader text='Overview' icon_style="fs-3 text-info"
+                          actions={[]}/>
+
+            <KTCardBody className='pt-9 pb-0'>
+                <div className='d-flex flex-wrap flex-sm-nowrap mb-3'>
+                    {
+                        user?.image ? <div className='me-7 mb-4'>
+                            <div className='symbol symbol-100px symbol-lg-160px symbol-fixed position-relative'>
+                                <img src={user.image} alt={user.name}/>
+                            </div>
+                        </div> : <></>
+                    }
+
+                    <div className='flex-grow-1'>
+                        <div className='d-flex justify-content-between align-items-start flex-wrap mb-2'>
+                            <div className='d-flex flex-column'>
+                                <div className='d-flex align-items-center mb-2'>
+                                    <span className='text-gray-800 fs-2 fw-bolder me-1'>
+                                        {user?.name}
+                                    </span>
+                                </div>
+
+                                <div className='d-flex flex-wrap fw-bold fs-6 mb-4 pe-2'>
+                                    <span className='d-flex align-items-center text-gray-400 me-5 mb-2'>
+                                        <KTSVG
+                                            path='/media/icons/duotune/communication/com006.svg'
+                                            className='svg-icon-4 me-1'
+                                        />
+                                        {user?.roles.map((role) => role.name).join(', ')}
+                                    </span>
+                                    <span className='d-flex align-items-center text-gray-400 mb-2'>
+                                        <KTSVG
+                                            path='/media/icons/duotune/communication/com011.svg'
+                                            className='svg-icon-4 me-1'
+                                        />
+                                        {user?.email}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </KTCardBody>
+        </KTCard>
+    )
+}
+
+export {Profile}
